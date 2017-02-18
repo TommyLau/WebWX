@@ -1,0 +1,192 @@
+swagger: '2.0'
+
+info:
+  title: 微信网页版
+  description: 微信网页版通信协议分析
+  contact:
+    name: Tommy Lau
+    url: https://tommy.net.cn/
+    email: tommy@gen-new.com
+  license:
+    name: CC BY-NC-SA 4.0
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+  version: "2017.02.18"
+
+host: login.wx.qq.com
+
+schemes:
+  - https
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+paths:
+  /jslogin:
+    get:
+      tags:
+        - login
+      summary: |
+        获取微信登录所需要的 UUID
+      description: |
+        这个接口是用来获取登录微信网页版所需要的 UUID 的。当正常调用后，会返回类似如下的信息：
+
+        ```
+        window.QRLogin.code = 200; window.QRLogin.uuid = "QaCtDfOBOg==";
+        ```
+
+        其中 `200` 表示返回正常，而 `QaCtDfOBOg==` 就是我们所需要的 `UUID`
+      produces:
+        - text/html
+      parameters:
+        - name: appid
+          in: query
+          description: 应用 ID，默认为 `wx782c26e4c19acffb`
+          required: true
+          type: string
+          default: wx782c26e4c19acffb
+        - name: redirect_uri
+          in: query
+          description: 跳转地址
+          required: false
+          type: string
+          default: https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage
+        - name: fun
+          in: query
+          description: 应用类型，默认 `new`
+          required: true
+          type: string
+          default: new
+        - name: lang
+          in: query
+          description: 语言 `en_US`、`zh_CN` 等
+          required: true
+          type: string
+          default: zh_CN
+        - name: _
+          in: query
+          description: 用毫秒表示的时间戳 `1487404367712`
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: 获得 UUID
+          schema:
+            type: string
+          headers:
+            Referer:
+              description: Referer
+              type: string
+              default: "https://wx.qq.com/"
+          examples:
+            text/javascript:
+              window.QRLogin.code = 200; window.QRLogin.uuid = "QaCtDfOBOg==";
+
+  /qrcode/{uuid}:
+    get:
+      tags:
+        - login
+      summary: 生成登录 QR Code
+      description: |
+        根据之前获得的 UUID 来获得供手机扫描的 QR Code 图片。
+
+        如果不用这个地址获得图片的话，也可以直接用下面的这种地址方式来手动生成二维码：
+
+        https://login.weixin.qq.com/l/{uuid}
+
+        例如：
+
+        https://login.weixin.qq.com/l/QaCtDfOBOg==
+      produces:
+        - image/jpeg
+      parameters:
+        - in: path
+          name: uuid
+          description: 登录用的 UUID
+          required: true
+          type: string
+      responses:
+        "200":
+          description: 二维码登录图片
+          schema:
+            type: string
+            format: binary
+          headers:
+            Referer:
+              description: Referer
+              type: string
+              default: "https://wx.qq.com/"
+
+  /cgi-bin/mmwebwx-bin/login:
+    get:
+      tags:
+        - login
+      summary: 扫描 QR Code
+      description: |
+        这个接口用于处理二维码扫描，未扫描二维码之前 `tip=1`，扫描二维码之后 `tip=0`
+
+        不确定 `r` 的含义，似乎可以忽略不处理。
+
+        返回信息为 `text/javascript`：
+
+        ```
+        window.code=xxx;
+        ```
+
+        其中：
+
+        - 408 登陆超时
+        - 201 扫描成功
+        - 200 确认登录
+
+        当返回 `200` 时，还会有类似如下的信息：
+
+        ```
+        window.code=200;
+        window.redirect_uri="https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=A92-y8oCy2sRwsUEUdcDlRJG@qrticket_0&uuid=4c4aXEMW7A==&lang=en_US&scan=1487444696";
+        ```
+      produces:
+        - text/javascript
+      parameters:
+        - name: loginicon
+          in: query
+          description: 是否显示登录图标
+          required: false
+          type: boolean
+          default: false
+        - name: uuid
+          in: query
+          description: UUID
+          required: true
+          type: string
+        - name: tip
+          in: query
+          description: 二维码扫描状态，1 - 未扫描，0 - 已扫描
+          required: true
+          type: integer
+          format: int32
+        - name: r
+          in: query
+          description: 用途未知，部分微信 Bot 使用 timestamp / 1579
+          required: false
+          type: integer
+          format: int64
+        - name: _
+          in: query
+          description: 用毫秒表示的时间戳 `1487404367712`
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: 扫描二维码
+          schema:
+            type: string
+          headers:
+            Referer:
+              description: Referer
+              type: string
+              default: "https://wx.qq.com/"
