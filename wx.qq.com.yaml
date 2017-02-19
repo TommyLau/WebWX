@@ -1,0 +1,345 @@
+swagger: '2.0'
+
+info:
+  title: 微信网页版
+  description: 微信网页版通信协议分析
+  contact:
+    name: Tommy Lau
+    url: https://tommy.net.cn/
+    email: tommy@gen-new.com
+  license:
+    name: CC BY-NC-SA 4.0
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+  version: "2017.02.18"
+
+host: wx.qq.com
+
+schemes:
+  - https
+
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+paths:
+  /cgi-bin/mmwebwx-bin/webwxinit:
+    post:
+      tags:
+        - init
+      summary: |
+        初始化网页微信
+      description: |
+        这个接口是用来在登录后初始化网页版微信的。
+
+        只有一个 query 参数 `r`，然而不知道是什么意思，抓取到的也是负数的时间，比如：
+
+        ```
+        https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r=-1386048559
+        ```
+
+        直接用现在的 timestamp 来提交貌似也可以。
+      parameters:
+        - name: r
+          in: query
+          description: 不知道用什么方式表现的时间戳 `-1386048559`
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          description: BaseRequest
+          required: true
+          schema:
+            $ref: "#/definitions/BaseRequest"
+      responses:
+        "200":
+          description: 初始化后返回的 WebWxInitResponse
+          schema:
+            $ref: "#/definitions/WebWxInitResponse"
+          headers:
+            Referer:
+              description: Referer
+              type: string
+              default: "https://wx.qq.com/"
+
+definitions:
+  BaseRequest:
+    type: object
+    properties:
+      DeviceID:
+        type: string
+      Sid:
+        type: string
+      Uin:
+        type: string
+      Skey:
+        type: string
+
+  BaseResponse:
+    type: object
+    properties:
+      Ret:
+        type: integer
+        format: int64
+      ErrMsg:
+        type: string
+
+  Member:
+    type: object
+    properties:
+      Uin:
+        type: integer
+        format: int64
+      UserName:
+        type: string
+      NickName:
+        type: string
+      AttrStatus:
+        type: integer
+        format: int64
+      PYInitial:
+        type: string
+      PYQuanPin:
+        type: string
+      RemarkPYInitial:
+        type: string
+      RemarkPYQuanPin:
+        type: string
+      MemberStatus:
+        type: integer
+        format: int64
+      DisplayName:
+        type: string
+      KeyWord:
+        type: string
+
+  Contact:
+    type: object
+    properties:
+      Uin:
+        type: integer
+        format: int64
+      UserName:
+        type: string
+      NickName:
+        type: string
+      HeadImgUrl:
+        type: string
+      ContactFlag:
+        type: integer
+        format: int64
+      MemberCount:
+        type: integer
+        format: int64
+      MemberList:
+        type: array
+        items:
+          $ref: "#/definitions/Member"
+      RemarkName:
+        type: string
+      HideInputBarFlag:
+        type: integer
+        format: int64
+      Sex:
+        type: integer
+        format: int64
+      Signature:
+        type: string
+      VerifyFlag:
+        type: integer
+        format: int64
+      OwnerUin:
+        type: integer
+        format: int64
+      PYInitial:
+        type: string
+      PYQuanPin:
+        type: string
+      RemarkPYInitial:
+        type: string
+      RemarkPYQuanPin:
+        type: string
+      StarFriend:
+        type: integer
+        format: int64
+      AppAccountFlag:
+        type: integer
+        format: int64
+      Statues:
+        type: integer
+        format: int64
+      AttrStatus:
+        type: integer
+        format: int64
+      Province:
+        type: string
+      City:
+        type: string
+      Alias:
+        type: string
+      SnsFlag:
+        type: integer
+        format: int64
+      UniFriend:
+        type: integer
+        format: int64
+      DisplayName:
+        type: string
+      ChatRoomId:
+        type: integer
+        format: int64
+      KeyWord:
+        type: string
+      EncryChatRoomId:
+        type: string
+      IsOwner:
+        type: integer
+        format: int64
+
+  KeyVal:
+    type: object
+    properties:
+      Key:
+        type: integer
+        format: int64
+      Val:
+        type: integer
+        format: int64
+
+  SyncKey:
+    type: object
+    properties:
+      Count:
+        type: integer
+        format: int64
+      List:
+        type: array
+        items:
+          $ref: "#/definitions/KeyVal"
+
+  User:
+    type: object
+    properties:
+      Uin:
+        type: integer
+        format: int64
+      UserName:
+        type: string
+      NickName:
+        type: string
+      HeadImgUrl:
+        type: string
+      RemarkName:
+        type: string
+      PYInitial:
+        type: string
+      PYQuanPin:
+        type: string
+      RemarkPYInitial:
+        type: string
+      RemarkPYQuanPin:
+        type: string
+      HideInputBarFlag:
+        type: integer
+        format: int64
+      StarFriend:
+        type: integer
+        format: int64
+      Sex:
+        type: integer
+        format: int64
+      Signature:
+        type: string
+      AppAccountFlag:
+        type: integer
+        format: int64
+      VerifyFlag:
+        type: integer
+        format: int64
+      ContactFlag:
+        type: integer
+        format: int64
+      WebWxPluginSwitch:
+        type: integer
+        format: int64
+      HeadImgFlag:
+        type: integer
+        format: int64
+      SnsFlag:
+        type: integer
+        format: int64
+
+  MPArticle:
+    type: object
+    properties:
+      Title:
+        type: string
+      Digest:
+        type: string
+      Cover:
+        type: string
+      Url:
+        type: string
+
+  MPSubscribeMsg:
+    type: object
+    properties:
+      UserName:
+        type: string
+      MPArticleCount:
+        type: integer
+        format: int64
+      MPArticleList:
+        type: array
+        items:
+          $ref: "#/definitions/MPArticle"
+      Time:
+        type: integer
+        format: int64
+      NickName:
+        type: string
+
+  WebWxInitResponse:
+    type: object
+    properties:
+      BaseResponse:
+        $ref: "#/definitions/BaseResponse"
+      Count:
+        type: integer
+        format: int64
+      ContactList:
+        type: array
+        items:
+          $ref: "#/definitions/Contact"
+      SyncKey:
+        $ref: "#/definitions/SyncKey"
+      User:
+        $ref: "#/definitions/User"
+      ChatSet:
+        type: string
+      SKey:
+        type: string
+      ClientVersion:
+        type: integer
+        format: int64
+      SystemTime:
+        type: integer
+        format: int64
+      GrayScale:
+        type: integer
+        format: int64
+      InviteStartCount:
+        type: integer
+        format: int64
+      MPSubscribeMsgCount:
+        type: integer
+        format: int64
+      MPSubscribeMsgList:
+        type: array
+        items:
+          $ref: "#/definitions/MPSubscribeMsg"
+      ClickReportInterval:
+        type: integer
+        format: int64
